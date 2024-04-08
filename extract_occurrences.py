@@ -40,22 +40,25 @@ def get_num_results(search_term, start_date, end_date):
 
     return num_results, success
 
-def get_range(search_term, start_date, end_date):
+def get_range(search_terms, start_date, end_date):
 
     fp = open("out.csv", 'w')
-    fp.write("year,results\n")
-    print("year,results")
+    fp.write("year," + ",".join(search_terms)+ "\n")
+    print("year," + ",".join(search_terms)+ "\n")
 
     for date in range(start_date, end_date + 1):
-
-        num_results, success = get_num_results(search_term, date, date)
-        if not(success):
-            print("It seems that you made to many requests to Google Scholar. Please wait a couple of hours and try again.")
-            break
-        year_results = "{0},{1}".format(date, num_results)
+        results = []
+        for search_term in search_terms:
+            num_results, success = get_num_results(search_term, date, date)
+            if not(success):
+                print("It seems that you made to many requests to Google Scholar. Please wait a couple of hours and try again.")
+                break
+            results.append(num_results)
+            time.sleep(5)
+        year_results = "{0},{1}".format(date, ",".join(results))
         print(year_results)
         fp.write(year_results + '\n')
-        time.sleep(0.8)
+        time.sleep(5)
 
     fp.close()
 
@@ -66,10 +69,11 @@ if __name__ == "__main__":
         print("Academic word relevance")
         print("******")
         print("")
-        print("Usage: python extract_occurences.py '<search term>' <start date> <end date>")
+        print("Usage: python extract_occurences.py '<search term 1>, <search term 2>, ...' <start date> <end date>")
         
     else:
-        search_term = sys.argv[1]
+        search_term_list = sys.argv[1]
+        search_terms = search_term_list.split(',')
         start_date = int(sys.argv[2])
         end_date = int(sys.argv[3])
-        html = get_range(search_term, start_date, end_date)
+        html = get_range(search_terms, start_date, end_date)
